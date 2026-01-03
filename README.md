@@ -59,7 +59,7 @@
 ```bash
 git clone https://github.com/yourusername/Blog-Nest.git
 cd Blog-Nest
-```
+
 # Backend
 cd backend
 npm install
@@ -108,6 +108,6 @@ Blog-Nest/
 │
 ├─ .gitignore
 └─ README.md
-
+```
 
 
