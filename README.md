@@ -10,8 +10,6 @@
 - [Installation](#installation)
 - [Folder Structure](#folder-structure)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
@@ -109,5 +107,12 @@ Blog-Nest/
 ├─ .gitignore
 └─ README.md
 ```
+Usage
+
+Users can log in with Google, read blogs, and create their own posts.
+
+Admin functionality (if implemented) can manage blogs and users.
+
+Backend handles API requests, database operations, and image uploads securely.
 
 
