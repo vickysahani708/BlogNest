@@ -24,7 +24,7 @@ const isStrongPassword = (password) => {
     /[0-9]/.test(password);
 };
 
-// Helper: Generate JWT token
+
 const generateToken = (user) => {
   return jwt.sign(
     {
@@ -38,12 +38,12 @@ const generateToken = (user) => {
   );
 };
 
-// Helper: Set secure cookie
+
 const setAuthCookie = (res, token) => {
   res.cookie('access_token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // true in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    secure: true,
+    sameSite: 'None',
     path: '/',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   });
@@ -54,7 +54,7 @@ export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
-    // Input validation
+
     if (!name || !email || !password) {
       return next(handleError(400, "All fields are required"));
     }
@@ -67,16 +67,16 @@ export const registerUser = async (req, res, next) => {
       return next(handleError(400, "Password must be at least 8 characters with uppercase, lowercase, and number"));
     }
 
-    // Check for existing user
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return next(handleError(409, "Email already registered"));
     }
 
-    // Hash password with higher cost factor for better security
+
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user
+
     await User.create({ name, email, password: hashedPassword });
 
     res.status(201).json({
@@ -88,12 +88,12 @@ export const registerUser = async (req, res, next) => {
   }
 };
 
-// 🔐 Google Login
+
 export const GoogleloginUser = async (req, res, next) => {
   try {
     const { name, email, avatar } = req.body;
 
-    // Input validation
+
     if (!name || !email) {
       return next(handleError(400, "Name and email are required"));
     }
@@ -104,9 +104,9 @@ export const GoogleloginUser = async (req, res, next) => {
 
     let user = await User.findOne({ email });
 
-    // Create new user if doesn't exist
+
     if (!user) {
-      // Generate cryptographically secure random password
+
       const randomPassword = crypto.randomBytes(32).toString('hex');
       const hashedPassword = await bcrypt.hash(randomPassword, 12);
 
@@ -120,13 +120,13 @@ export const GoogleloginUser = async (req, res, next) => {
       user = await newUser.save();
     }
 
-    // Generate token
+
     const token = generateToken(user);
 
-    // Set cookie
+
     setAuthCookie(res, token);
 
-    // Remove password from response
+
     const userResponse = user.toObject({ getters: true });
     delete userResponse.password;
 
@@ -140,19 +140,19 @@ export const GoogleloginUser = async (req, res, next) => {
   }
 };
 
-// 🔑 Login User
+
 export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Input validation
+
     if (!email || !password) {
       return next(handleError(400, "Email and password are required"));
     }
 
     // Find user
     const user = await User.findOne({ email });
-    
+
     // Generic error message to prevent user enumeration
     if (!user) {
       return next(handleError(401, "Invalid credentials"));
@@ -164,13 +164,13 @@ export const loginUser = async (req, res, next) => {
       return next(handleError(401, "Invalid credentials"));
     }
 
-    // Generate token
+
     const token = generateToken(user);
 
-    // Set cookie
+
     setAuthCookie(res, token);
 
-    // Remove password from response
+
     const userResponse = user.toObject({ getters: true });
     delete userResponse.password;
 
@@ -184,14 +184,15 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
-// 🚪 Logout
+
 export const Logout = async (req, res, next) => {
   try {
     res.clearCookie('access_token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-      path: '/'
+      secure: true,
+      sameSite: "None",
+      path: "/",
+      maxAge: 24 * 60 * 60 * 1000
     });
 
     res.status(200).json({
